@@ -10,12 +10,20 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["First thing", "Second Thing", "Third Thing"]
+    var itemArray = [""]
     var textField = UITextField()
+    var defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+           itemArray = items
+        }
+        
+        
+        
     }
 
     //MARK - Table DataSource Methods
@@ -56,6 +64,8 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { ( myAction) in
             // code to handle when user select Add.
             self.itemArray.append(self.textField.text!)
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            
             self.tableView.reloadData()
         }
         // 3. Add a Text Field to Alert
@@ -75,5 +85,5 @@ class TodoListViewController: UITableViewController {
 }
 
 
-// Next video is 223
+// Next video is 226
 
