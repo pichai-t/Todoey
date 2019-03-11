@@ -7,11 +7,14 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]() // To keep information of cell
     var textField = UITextField()
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     //var defaults = UserDefaults.standard
     
@@ -26,7 +29,7 @@ class TodoListViewController: UITableViewController {
         print(dataFilePath)
         
         // Load data from stored data (from "itemArray")
-        loadFromNSCoder2ItemArray()
+        loadFromCoreData()
         
 //        var item = Item()
 //        item.title = "test"
@@ -59,9 +62,16 @@ class TodoListViewController: UITableViewController {
     // 2. When SELECT ROW
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Set 'done' (tick)
-        itemArray[indexPath.row].done = !(itemArray[indexPath.row].done)
+         itemArray[indexPath.row].done = !(itemArray[indexPath.row].done)
         
-        saveItemArrayToNSCoder()
+        // Alternative: itemArray[indexPath.row].setValue(true, forKey: "done")
+        
+        // DELETE/REMOVE
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
+        // -------------
+        
+        saveItemArrayToCoreData()
         refreshScreen()
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -76,7 +86,9 @@ class TodoListViewController: UITableViewController {
         // 2. Action to add to Alert
         let action = UIAlertAction(title: "Add Item", style: .default) { ( myAction) in
             // code to handle when user select Add.
-            let item = Item()
+            
+            
+            let item = Item(context: self.context)
             item.title = self.textField.text!
             item.done = false
             
@@ -84,7 +96,7 @@ class TodoListViewController: UITableViewController {
             //self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
             // Save ItemArray to NSCoder, load from NSCoder and refresh screen.
-            self.saveItemArrayToNSCoder()
+            self.saveItemArrayToCoreData()
             //self.loadFromNSCoder2ItemArray()
             self.refreshScreen()
 
@@ -103,28 +115,41 @@ class TodoListViewController: UITableViewController {
 
     }
     
-    func saveItemArrayToNSCoder() {
+    func saveItemArrayToCoreData() {
         // Put data into NSCoder
-        let encoder = PropertyListEncoder()
+//        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
+//            let data = try encoder.encode(itemArray)
+//            try data.write(to: dataFilePath!)
         }
         catch {
-            print ("Error encoding item array \(error)")
+            print ("Error saving context: \(error)")
         }
     }
     
     func refreshScreen() {
         tableView.reloadData()
     }
+    
+    func loadFromCoreData() {
+        
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            itemArray = try context.fetch(request)
+        }
+        catch {
+            print("Error fetching data from context: \(error)")
+        }
+        
+    }
 
-    func loadFromNSCoder2ItemArray() {
+    func OLD_loadFromNSCoder2ItemArray() {
         // Load data from NSCoder
         if let data = try? Data(contentsOf: dataFilePath!) {
             do {
-                let decoder = PropertyListDecoder()
-                itemArray = try decoder.decode([Item].self, from: data)
+//                let decoder = PropertyListDecoder()
+//                itemArray = try decoder.decode([Item].self, from: data)
             }
             catch {
                 print("Error in decoding \(error)")
@@ -135,5 +160,5 @@ class TodoListViewController: UITableViewController {
 }
 
 
-// Continue with 236
+// Continue with 240
 

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item : Encodable, Decodable{
+class obsolete_Item : Encodable, Decodable{
     
     var title : String = ""
     var done : Bool = false
