@@ -43,6 +43,7 @@
 			isa = PBXGroup;
 			children = (
 				959CDEC7222EA43000549A96 /* Main.storyboard */,
+				959CDECC222EA43100549A96 /* LaunchScreen.storyboard */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -88,7 +89,6 @@
 				950B4CE222363D6A005D6118 /* Controller */,
 				950B4CE122363D2F005D6118 /* Model */,
 				959CDECA222EA43100549A96 /* Assets.xcassets */,
-				959CDECC222EA43100549A96 /* LaunchScreen.storyboard */,
 				959CDECF222EA43100549A96 /* Info.plist */,
 			);
 			path = Todoey;

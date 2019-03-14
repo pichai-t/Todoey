@@ -9,13 +9,13 @@
 import UIKit
 import CoreData
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: UITableViewController{
 
     var itemArray = [Item]() // To keep information of cell
     var textField = UITextField()
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
+
     //var defaults = UserDefaults.standard
     
     // Create a Data File Path -- where stores data to physical -- NSCoder
@@ -24,12 +24,17 @@ class TodoListViewController: UITableViewController {
     // 1. WHEN First loading.
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
-        //print(dataFilePath)
+        
+       // searchBar.delegate = self
         
         // Load data from stored data (to "itemArray")
         load_n_Link_itemArrayFromCoreData()
+        
+        // Do any additional setup after loading the view, typically from a nib.
+        
+        //print(dataFilePath)
+
         
 //        var item = Item()
 //        item.title = "test"
@@ -77,7 +82,7 @@ class TodoListViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    //MARK --
+    //MARK:  Add a new item
     // 3 When Add New Items
     @IBAction func addButtonPressed(_ sender: Any) {
 
@@ -135,8 +140,9 @@ class TodoListViewController: UITableViewController {
     }
     
     // Load Data from CoreData
-    func load_n_Link_itemArrayFromCoreData() {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    func load_n_Link_itemArrayFromCoreData(with request: NSFetchRequest<Item> = Item.fetchRequest() ) {
+        
+        //let request : NSFetchRequest<Item> = Item.fetchRequest()
         do {
             itemArray = try context.fetch(request)
         }
@@ -163,8 +169,36 @@ class TodoListViewController: UITableViewController {
 //            }
 //        }
 //    }
+
+
+}
+
+
+//MARK - SearchBar
+extension TodoListViewController : UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        // create a request object
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        if (searchBar.text != "") {
+            // set request's predicate (filtering)
+            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+            request.predicate = predicate
+        }
+        
+        // set Sorting to request's sortDescriptors.
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        request.sortDescriptors = [sortDescriptor]
+        
+        // Doing the fetch using 'request' object
+        load_n_Link_itemArrayFromCoreData(with: request)
+        
+        refreshScreen()
+    }
     
 }
+
 
 
 // Continue with 243
