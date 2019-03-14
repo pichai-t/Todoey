@@ -18,18 +18,18 @@ class TodoListViewController: UITableViewController {
     
     //var defaults = UserDefaults.standard
     
-    // Create a Data File Path -- where stores data to physical
-    var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    // Create a Data File Path -- where stores data to physical -- NSCoder
+//    var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     // 1. WHEN First loading.
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        print(dataFilePath)
+        //print(dataFilePath)
         
-        // Load data from stored data (from "itemArray")
-        loadFromCoreData()
+        // Load data from stored data (to "itemArray")
+        load_n_Link_itemArrayFromCoreData()
         
 //        var item = Item()
 //        item.title = "test"
@@ -59,19 +59,19 @@ class TodoListViewController: UITableViewController {
     }
     // =============================================================
 
-    // 2. When SELECT ROW
+    // 2. When SELECT ROW - tick or untick.
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Set 'done' (tick)
          itemArray[indexPath.row].done = !(itemArray[indexPath.row].done)
         
         // Alternative: itemArray[indexPath.row].setValue(true, forKey: "done")
         
-        // DELETE/REMOVE
-//        context.delete(itemArray[indexPath.row])
-//        itemArray.remove(at: indexPath.row)
+        // DELETE from staging and then REMOVE from itemArray.
+        //        context.delete(itemArray[indexPath.row])
+        //        itemArray.remove(at: indexPath.row)
         // -------------
         
-        saveItemArrayToCoreData()
+        saveStagingAreaToCoreData()
         refreshScreen()
         
         tableView.deselectRow(at: indexPath, animated: true)
@@ -85,18 +85,23 @@ class TodoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add new Todoey Item", message: "", preferredStyle: .alert)
         // 2. Action to add to Alert
         let action = UIAlertAction(title: "Add Item", style: .default) { ( myAction) in
-            // code to handle when user select Add.
-            
-            
+            // code to handle when user selects Add.
+     
+            // IMPORTANT TO UNDERSTAND HERE
+            // Since load_n_Link_itemArrayFromCoreData() has liked 'itemArray[]' to Context.
+            // 'item' is linked to 'Item' - which is the 'context' - is the CoreData thing.
+            // So, whatever tou do with 'itemArray[]' is kept in Staging area.
+            // ============================
             let item = Item(context: self.context)
             item.title = self.textField.text!
             item.done = false
             
+            // Append a new item back to 'itemArray'
             self.itemArray.append(item)
             //self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
             // Save ItemArray to NSCoder, load from NSCoder and refresh screen.
-            self.saveItemArrayToCoreData()
+            self.saveStagingAreaToCoreData()
             //self.loadFromNSCoder2ItemArray()
             self.refreshScreen()
 
@@ -115,25 +120,22 @@ class TodoListViewController: UITableViewController {
 
     }
     
-    func saveItemArrayToCoreData() {
+    // Save Data to CoreData
+    func saveStagingAreaToCoreData() {
         // Put data into NSCoder
-//        let encoder = PropertyListEncoder()
+        //   let encoder = PropertyListEncoder()
         do {
             try context.save()
-//            let data = try encoder.encode(itemArray)
-//            try data.write(to: dataFilePath!)
+            //    let data = try encoder.encode(itemArray)
+            //    try data.write(to: dataFilePath!)
         }
         catch {
             print ("Error saving context: \(error)")
         }
     }
     
-    func refreshScreen() {
-        tableView.reloadData()
-    }
-    
-    func loadFromCoreData() {
-        
+    // Load Data from CoreData
+    func load_n_Link_itemArrayFromCoreData() {
         let request : NSFetchRequest<Item> = Item.fetchRequest()
         do {
             itemArray = try context.fetch(request)
@@ -141,24 +143,29 @@ class TodoListViewController: UITableViewController {
         catch {
             print("Error fetching data from context: \(error)")
         }
-        
+    }
+    
+    func refreshScreen() {
+        tableView.reloadData() // To call two methods basically;
+        // 1. override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // 2. override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     }
 
-    func OLD_loadFromNSCoder2ItemArray() {
-        // Load data from NSCoder
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            do {
-//                let decoder = PropertyListDecoder()
-//                itemArray = try decoder.decode([Item].self, from: data)
-            }
-            catch {
-                print("Error in decoding \(error)")
-            }
-        }
-    }
+//    func loadFromNSCoder2ItemArray() {
+//        // Load data from NSCoder
+//        if let data = try? Data(contentsOf: dataFilePath!) {
+//            do {
+////                let decoder = PropertyListDecoder()
+////                itemArray = try decoder.decode([Item].self, from: data)
+//            }
+//            catch {
+//                print("Error in decoding \(error)")
+//            }
+//        }
+//    }
     
 }
 
 
-// Continue with 240
+// Continue with 243
 
