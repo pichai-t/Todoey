@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class TodoListViewController: UITableViewController{
+class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]() // To keep information of cell
     var textField = UITextField()
@@ -92,12 +92,13 @@ class TodoListViewController: UITableViewController{
         let action = UIAlertAction(title: "Add Item", style: .default) { ( myAction) in
             // code to handle when user selects Add.
      
-            // IMPORTANT TO UNDERSTAND HERE
+            // ***** IMPORTANT TO UNDERSTAND HERE *****
             // Since load_n_Link_itemArrayFromCoreData() has liked 'itemArray[]' to Context.
             // 'item' is linked to 'Item' - which is the 'context' - is the CoreData thing.
-            // So, whatever tou do with 'itemArray[]' is kept in Staging area.
-            // ============================
+            // So, whatever you do with 'itemArray[]' is kept in Staging area.
+            // =========================================
             let item = Item(context: self.context)
+            
             item.title = self.textField.text!
             item.done = false
             
@@ -145,6 +146,7 @@ class TodoListViewController: UITableViewController{
         //let request : NSFetchRequest<Item> = Item.fetchRequest()
         do {
             itemArray = try context.fetch(request)
+            refreshScreen()
         }
         catch {
             print("Error fetching data from context: \(error)")
@@ -152,9 +154,10 @@ class TodoListViewController: UITableViewController{
     }
     
     func refreshScreen() {
-        tableView.reloadData() // To call two methods basically;
+        // To call two methods basically;
         // 1. override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2. override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        tableView.reloadData()
     }
 
 //    func loadFromNSCoder2ItemArray() {
@@ -181,11 +184,11 @@ extension TodoListViewController : UISearchBarDelegate {
         // create a request object
         let request : NSFetchRequest<Item> = Item.fetchRequest()
         
-        if (searchBar.text != "") {
+        //if (searchBar.text != "") {
             // set request's predicate (filtering)
             let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
             request.predicate = predicate
-        }
+        //}
         
         // set Sorting to request's sortDescriptors.
         let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
@@ -194,12 +197,28 @@ extension TodoListViewController : UISearchBarDelegate {
         // Doing the fetch using 'request' object
         load_n_Link_itemArrayFromCoreData(with: request)
         
-        refreshScreen()
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if (searchBar.text?.count == 0) {
+            load_n_Link_itemArrayFromCoreData()
+            
+            // (A BIT CONFUSED HERE) - Go to main thread (so the code inside will be on another thread)
+            DispatchQueue.main.async {
+               // Resign as(from) the first corresponder!!
+               // Once searchBar had downgraded (not 1st anymore), the keyboard will be disappear.
+               searchBar.resignFirstResponder()
+            }
+       
+            
+        }
+        
     }
     
 }
 
 
 
-// Continue with 243
+// Continue with 244 (7.20 min)
 
