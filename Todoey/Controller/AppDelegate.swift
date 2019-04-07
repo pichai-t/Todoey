@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 import CoreData
 
 @UIApplicationMain
@@ -17,15 +18,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        // Location of CoreData.
-        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! )
+        // Location of CoreData and Realm
+        //print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! )
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
         
+        do {
+            let realm = try Realm()
+            
+//            try realm.write {
+//                realm.add(data)
+//            }
+            
+        } catch {
+            print ("Error initializing new Realm, \(error)")
+        }
+        
+
         return true
     }
     
-    func applicationWillTerminate(_ application: UIApplication) {
-        self.saveContext()
-    }
+//    func applicationWillTerminate(_ application: UIApplication) {
+//        self.saveContext()
+//    }
 
     
     // MARK: - Core Data stack
@@ -44,18 +58,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // MARK: - Core Data Saving support
     
-    func saveContext () {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                //
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
-        }
-    }
+//    func saveContext () {
+//        let context = persistentContainer.viewContext
+//        if context.hasChanges {
+//            do {
+//                try context.save()
+//            } catch {
+//                //
+//                let nserror = error as NSError
+//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//            }
+//        }
+//    }
 
 
 }

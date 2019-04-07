@@ -7,12 +7,15 @@
 //
 
 import UIKit
-import CoreData
+//import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
     
+    let realm = try! Realm()
     // To keep information of cell
-    var catArray = [Category]()
+    var categoryArray : Results<Category>!
+    
     var bufferedTextField : UITextField? = nil
     
     // link to context(staging)
@@ -21,7 +24,9 @@ class CategoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadCat_from_CoreData()
+ //       loadCat_from_CoreData()
+        
+        loadCategory_from_Realm()
         
     }
     
@@ -31,39 +36,54 @@ class CategoryViewController: UITableViewController {
     //Mark: - 1 TableView DataSource Methods
     // NumberOfRows In Section
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return catArray.count
+        return categoryArray?.count ?? 1
     }
 
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         // CategoryCell
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        let cat = catArray[indexPath.row]
-        cell.textLabel?.text = cat.name
+        // let cat = categoryArray[indexPath.row]
+        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Categories Added yet"
         return cell
     }
     // ========================================
     
     //Mark: - 2 Data Manipulation Methods; SaveData and LoadData
-    func loadCat_from_CoreData() {
-        let request : NSFetchRequest<Category> = Category.fetchRequest()
+//    func loadCat_from_CoreData() {
+//        let request : NSFetchRequest<Category> = Category.fetchRequest()
+//        do {
+//            catArray = try context.fetch(request) // LINKED 'context' to 'catArray'
+//            tableView.reloadData()
+//        } catch {
+//            print ("Error in Fetch request \(error)")
+//        }
+//    }
+
+    func loadCategory_from_Realm() {
+        // Linking Auto-Update HERE!! - IMPORTANT!!
+        categoryArray = realm.objects(Category.self)
+    }
+    
+//    func saveStagingToCoreData() {
+//        do {
+//            try context.save()
+//        }
+//        catch {
+//            print("Error when Saving Context \(error)")
+//        }
+//    }
+    
+    func saveCategory2Realm(category: Category) {
         do {
-            catArray = try context.fetch(request) // LINKED 'context' to 'catArray'
-            tableView.reloadData()
+            try realm.write {
+                realm.add(category)
+            }
         } catch {
-            print ("Error in Fetch request \(error)")
+            print ("Error when saving Category: \(error)")
         }
+        
     }
-    
-    func saveStagingToCoreData() {
-        do {
-            try context.save()
-        }
-        catch {
-            print("Error when Saving Context \(error)")
-        }
-    }
-    
     
     //Mark: - 3 Add a new Category
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -72,11 +92,16 @@ class CategoryViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add", style: .default) { (myAction) in
             
-            let newCat = Category(context: self.context)
-            newCat.name = self.bufferedTextField!.text
-            self.catArray.append(newCat)
-        
-            self.saveStagingToCoreData()
+            let newCat = Category()
+            newCat.name = self.bufferedTextField!.text!
+    
+            //self.catArray.append(newCat) // ** Why in Realm, there is no need to append? **
+                                           // Since 'var catArray : Results<Category>?', Results object has 'auto-updating' capability
+                                           // for any Category() object?
+            
+            //self.saveStagingToCoreData()
+            
+            self.saveCategory2Realm(category: newCat)
             self.tableView.reloadData()
         }
         
@@ -93,15 +118,24 @@ class CategoryViewController: UITableViewController {
         
     }
     
-
-    
     //Mark: - TableView Delegate Methods - when clicking one of the cell.
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //
-        tableView.deselectRow(at: indexPath, animated: true)
+        // tableView.deselectRow(at: indexPath, animated: true)
         // tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-    
         
+        performSegue(withIdentifier: "goToItems", sender: self)
     
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! TodoListViewController
+        
+        if let indexPath = tableView.indexPathForSelectedRow {
+            destinationVC.selectedCategory = categoryArray?[indexPath.row]
+        }
+    }
+    
+    
+    
 }
