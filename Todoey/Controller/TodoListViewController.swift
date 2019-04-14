@@ -80,16 +80,6 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Set 'done' (tick)
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         //todoItems![indexPath.row].done = !(todoItems![indexPath.row].done)
         
         // Alternative: itemArray[indexPath.row].setValue(true, forKey: "done")
@@ -97,8 +87,21 @@ class TodoListViewController: UITableViewController {
         // DELETE from staging and then REMOVE from itemArray.
         //        context.delete(itemArray[indexPath.row])
         //        itemArray.remove(at: indexPath.row)
-        // -------------
+        // ---------------
         
+
+        // ---------------
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    item.done = !item.done
+                    // realm.delete(item)
+            }
+            } catch {
+                print("Error saving done status \(error)")
+            }
+        }
+
         // saveStagingAreaToCoreData()
         refreshScreen()
         
@@ -264,5 +267,5 @@ extension TodoListViewController : UISearchBarDelegate {
     }
     
     
-    // CONTINUE 251 !! - / 7 Apr 2019
+    // CONTINUE 254!! - / 14 Apr 2019
 }
