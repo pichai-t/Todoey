@@ -284,7 +284,6 @@ extension TodoListViewController : UISearchBarDelegate {
 //        }
         
     }
-    
-    
+
     // CONTINUE 255! / 14 Apr 2019
 }
