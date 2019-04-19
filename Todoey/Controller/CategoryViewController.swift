@@ -173,7 +173,6 @@ extension CategoryViewController: SwipeTableViewCellDelegate {
                 }
                 tableView.reloadData()
             }
-            
         }
         
         // customize the action appearance
@@ -182,6 +181,13 @@ extension CategoryViewController: SwipeTableViewCellDelegate {
         return [deleteAction]
     }
     
+    func collectionView(_ collectionView: UICollectionView, editActionsOptionsForItemAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
+        var options = SwipeOptions()
+        options.expansionStyle = .destructive
+        options.transitionStyle = .border
+        return options
+    }
     
+    // Continue 258 // 20 Apr 2019
     
 }
