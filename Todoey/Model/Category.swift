@@ -12,9 +12,9 @@ import RealmSwift
 class Category : Object {
     
     @objc dynamic var name : String = ""
-    let items_child = List<Item>()
+    let items_child = List<Item>() // each Category can have several Item objects.
     
-    // Category points toward Items
-    // and Items points back to Category (inversed relationship)
+    // NOTE: 'Category' class points toward 'Items' in term of List and
+    //        Items points back to Category (inversed relationship)
     
 }

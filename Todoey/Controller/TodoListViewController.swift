@@ -87,8 +87,6 @@ class TodoListViewController: UITableViewController {
         // DELETE from staging and then REMOVE from itemArray.
         //        context.delete(itemArray[indexPath.row])
         //        itemArray.remove(at: indexPath.row)
-        // ---------------
-        
 
         // ---------------
         if let item = todoItems?[indexPath.row] {
@@ -143,8 +141,13 @@ class TodoListViewController: UITableViewController {
                 do {
                   try self.realm.write {
                     let newItem = Item()
+                    
                     newItem.title = self.textField.text!
                     newItem.done = false
+                    //let formatter = DateFormatter()
+                    //formatter.dateFormat = "dd.MM.yyyy hh:mm:ss"
+                    newItem.dateCreated = Date() // formatter.string(from: Date())
+                    
                     selectedCat.items_child.append(newItem)
                     }
                 }
@@ -198,12 +201,10 @@ class TodoListViewController: UITableViewController {
 //    }
     
     func loadItems() {
-        
         todoItems = selectedCategory?.items_child.sorted(byKeyPath: "title", ascending: true)
-        
     }
     
-    
+
     func refreshScreen() {
         // To call two methods basically;
         // 1. override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -232,6 +233,9 @@ class TodoListViewController: UITableViewController {
 extension TodoListViewController : UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
+        
 //        // create a request object
 //        let request : NSFetchRequest<Item> = Item.fetchRequest()
 //
@@ -248,10 +252,25 @@ extension TodoListViewController : UISearchBarDelegate {
 //        // Doing the fetch using 'request' object
 //        load_n_Link_itemArrayFromCoreData(with: request)
         
+          tableView.reloadData()
+        
     }
     
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text?.count == 0 {
+            loadItems()
+            
+            DispatchQueue.main.async {
+                // Resign as(from) the first corresponder!!
+                // Once searchBar had downgraded (not 1st anymore), the keyboard will be disappear.
+                searchBar.resignFirstResponder()
+            }
+            
+            tableView.reloadData()
+
+        }
 //        if (searchBar.text?.count == 0) {
 //            load_n_Link_itemArrayFromCoreData()
 //
@@ -267,5 +286,5 @@ extension TodoListViewController : UISearchBarDelegate {
     }
     
     
-    // CONTINUE 254!! - / 14 Apr 2019
+    // CONTINUE 255! / 14 Apr 2019
 }

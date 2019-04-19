@@ -19,13 +19,12 @@ class CategoryViewController: UITableViewController {
     var bufferedTextField : UITextField? = nil
     
     // link to context(staging)
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
  //       loadCat_from_CoreData()
-        
         loadCategory_from_Realm()
         
     }
@@ -38,7 +37,6 @@ class CategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categoryArray?.count ?? 1
     }
-
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         // CategoryCell
@@ -82,12 +80,14 @@ class CategoryViewController: UITableViewController {
         } catch {
             print ("Error when saving Category: \(error)")
         }
-        
+        tableView.reloadData()
     }
     
     //Mark: - 3 Add a new Category
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
+        // alert object is foundation for 'Action' and 'TextField'
+        // need to add action to alert, plus do 'Present' alert.
         let alert = UIAlertController(title: "Add new Category", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add", style: .default) { (myAction) in
@@ -100,9 +100,8 @@ class CategoryViewController: UITableViewController {
                                            // for any Category() object?
             
             //self.saveStagingToCoreData()
-            
             self.saveCategory2Realm(category: newCat)
-            self.tableView.reloadData()
+            
         }
         
         // Add Text Field (for the new Category Name)
@@ -128,6 +127,7 @@ class CategoryViewController: UITableViewController {
     
     }
     
+    // Before doing Sague
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destinationVC = segue.destination as! TodoListViewController
         
@@ -135,7 +135,5 @@ class CategoryViewController: UITableViewController {
             destinationVC.selectedCategory = categoryArray?[indexPath.row]
         }
     }
-    
-    
     
 }
