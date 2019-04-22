@@ -9,8 +9,9 @@
 import UIKit
 import RealmSwift
 //import CoreData
+import ChameleonFramework
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
 
@@ -33,7 +34,6 @@ class TodoListViewController: UITableViewController {
     // 1. WHEN First loading.
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         
        // searchBar.delegate = self
         
@@ -64,14 +64,24 @@ class TodoListViewController: UITableViewController {
     
     // When LOADING For Each Cell - *** First time and whenever 'tableView.reloadData()' called ***
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath )
+        // let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath )
+        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+
+        // get/return 'title' and 'accessorry type' for each cell from Realm
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = (item.done == true) ? .checkmark : .none
+           
+            if let color = UIColor(hexString: selectedCategory!.catColor)!.darken(byPercentage: (CGFloat(indexPath.row) / CGFloat(todoItems!.count))) {
+                cell.backgroundColor = color
+                cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+            }
+            
         } else {
             cell.textLabel?.text = "No item added"
         }
-        
+    
         return cell  // Then for the first time, tableView.reloadData will be automatically called.
     }
     // =============================================================
@@ -104,6 +114,23 @@ class TodoListViewController: UITableViewController {
         refreshScreen()
         
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    // ====================================================
+    
+    override func updateModel(at indexPath: IndexPath) {
+
+        if let item = todoItems?[indexPath.row]{
+            do {
+                try self.realm.write {
+                    self.realm.delete(item)
+                }
+            } catch {
+                print("Error deleting Item: \(error)")
+            }
+            tableView.reloadData()
+        }
+        
     }
     
     //MARK:  Add a new item
@@ -225,7 +252,6 @@ class TodoListViewController: UITableViewController {
 //        }
 //    }
 
-
 }
 
 
@@ -285,4 +311,8 @@ extension TodoListViewController : UISearchBarDelegate {
         
     }
 
+    
+    
+    // Continue 263 // 22 Apr 2019
+    
 }

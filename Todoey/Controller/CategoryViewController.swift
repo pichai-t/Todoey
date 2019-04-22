@@ -9,9 +9,12 @@
 import UIKit
 //import CoreData
 import RealmSwift
-import SwipeCellKit
+//import SwipeCellKit
 
-class CategoryViewController: UITableViewController {
+import ChameleonFramework
+
+
+class CategoryViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     // To keep information of cell
@@ -27,9 +30,7 @@ class CategoryViewController: UITableViewController {
         
  //       loadCat_from_CoreData()
         loadCategory_from_Realm()
-        
-        tableView.rowHeight = 80.0
-        
+
     }
     
     // ========================================
@@ -37,26 +38,20 @@ class CategoryViewController: UITableViewController {
     
     //Mark: - 1 TableView DataSource Methods
     // NumberOfRows In Section
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categoryArray?.count ?? 1
     }
-
-//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! SwipeTableViewCell
-//        cell.delegate = self
-//        return cell
-//    }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
-        // CategoryCell
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
-        // let cat = categoryArray[indexPath.row]
-        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Categories Added yet"
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        cell.delegate = self
+        cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Categories Added yet"
+        cell.backgroundColor = UIColor(hexString: (categoryArray?[indexPath.row].catColor) ?? "109BF6")
         
         return cell
     }
+
     // ========================================
     
     //Mark: - 2 Data Manipulation Methods; SaveData and LoadData
@@ -70,20 +65,6 @@ class CategoryViewController: UITableViewController {
 //        }
 //    }
 
-    func loadCategory_from_Realm() {
-        // Linking Auto-Update HERE!! - IMPORTANT!!
-        categoryArray = realm.objects(Category.self)
-    }
-    
-//    func saveStagingToCoreData() {
-//        do {
-//            try context.save()
-//        }
-//        catch {
-//            print("Error when Saving Context \(error)")
-//        }
-//    }
-    
     func saveCategory2Realm(category: Category) {
         do {
             try realm.write {
@@ -94,6 +75,34 @@ class CategoryViewController: UITableViewController {
         }
         tableView.reloadData()
     }
+    //    func saveStagingToCoreData() {
+    //        do {
+    //            try context.save()
+    //        }
+    //        catch {
+    //            print("Error when Saving Context \(error)")
+    //        }
+    //    }
+    
+    func loadCategory_from_Realm() {
+        // Linking Auto-Update HERE!! - IMPORTANT!!
+        categoryArray = realm.objects(Category.self)
+    }
+    
+    // updateModel from SuperClass
+    override func updateModel(at indexPath: IndexPath) {
+        if let cat2delete = self.categoryArray?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(cat2delete)
+                }
+            } catch {
+                print("Error deleting Category: \(error)")
+            }
+            tableView.reloadData()
+        }
+    }
+    
     
     //Mark: - 3 Add a new Category
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -106,6 +115,7 @@ class CategoryViewController: UITableViewController {
             
             let newCat = Category()
             newCat.name = self.bufferedTextField!.text!
+            newCat.catColor = UIColor.randomFlat.hexValue()
     
             //self.catArray.append(newCat) // ** Why in Realm, there is no need to append? **
                                            // Since 'var catArray : Results<Category>?', Results object has 'auto-updating' capability
@@ -148,46 +158,5 @@ class CategoryViewController: UITableViewController {
         }
     }
  
-
 }
 
-//MARK: - Swipe Cell Delegate Methods
-
-extension CategoryViewController: SwipeTableViewCellDelegate {
-    
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-        
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            // handle action by updating model with deletion
-            
-            print("icon deleted")
-            
-            if let cat2delete = self.categoryArray?[indexPath.row] {
-                do {
-                    try self.realm.write {
-                        self.realm.delete(cat2delete)
-                    }
-                } catch {
-                    print("Error deleting Category: \(error)")
-                }
-                tableView.reloadData()
-            }
-        }
-        
-        // customize the action appearance
-        deleteAction.image = UIImage(named: "delete-icon")
-        
-        return [deleteAction]
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, editActionsOptionsForItemAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-        options.transitionStyle = .border
-        return options
-    }
-    
-    // Continue 258 // 20 Apr 2019
-    
-}

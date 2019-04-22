@@ -12,6 +12,7 @@ import RealmSwift
 class Category : Object {
     
     @objc dynamic var name : String = ""
+    @objc dynamic var catColor : String = ""
     let items_child = List<Item>() // each Category can have several Item objects.
     
     // NOTE: 'Category' class points toward 'Items' in term of List and
