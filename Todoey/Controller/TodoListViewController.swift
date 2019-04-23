@@ -13,6 +13,8 @@ import ChameleonFramework
 
 class TodoListViewController: SwipeTableViewController {
     
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     let realm = try! Realm()
 
     var todoItems : Results<Item>? //[Item]() // To keep information of cell
@@ -23,6 +25,7 @@ class TodoListViewController: SwipeTableViewController {
             loadItems()
         }
     }
+    
     
 //    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
@@ -35,16 +38,16 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Set Title of Navigation bar as the "selectedCategory.name"
+
+        
        // searchBar.delegate = self
         
         // Load data from stored data (to "itemArray")
 //        load_n_Link_itemArrayFromCoreData()
         
         // Do any additional setup after loading the view, typically from a nib.
-        
-        //print(dataFilePath)
-
-        
+    
 //        var item = Item()
 //        item.title = "test"
 //        itemArray.append(item)
@@ -55,6 +58,24 @@ class TodoListViewController: SwipeTableViewController {
 //        }
     
     }
+    
+    // Just before User sees anything on screen
+    override func viewWillAppear(_ animated: Bool) {
+        
+        title = selectedCategory!.name
+        
+        
+        
+        if let colorHex = selectedCategory?.catColor {
+            guard let navBar = navigationController?.navigationBar else { fatalError("ERROR !! ") }
+            searchBar.barTintColor = UIColor(hexString: colorHex)
+            navBar.barTintColor = UIColor(hexString: colorHex)
+        }
+        
+    }
+    
+    
+    
 
     //MARK - TableView Delegate Methods - 2 required methods =====
     // When CHECKING Number of rows - *** First time and whenever 'tableView.reloadData()' called ***
@@ -313,6 +334,6 @@ extension TodoListViewController : UISearchBarDelegate {
 
     
     
-    // Continue 263 // 22 Apr 2019
+    // Continue 264 - at 12 mins // 22 Apr 2019
     
 }
