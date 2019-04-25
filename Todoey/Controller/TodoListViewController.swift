@@ -62,18 +62,36 @@ class TodoListViewController: SwipeTableViewController {
     // Just before User sees anything on screen
     override func viewWillAppear(_ animated: Bool) {
         
-        title = selectedCategory!.name
+        guard let colorHex = selectedCategory?.catColor  else { fatalError("Error UIColor is nil") }
+        title = selectedCategory?.name
         
-        
-        
-        if let colorHex = selectedCategory?.catColor {
-            guard let navBar = navigationController?.navigationBar else { fatalError("ERROR !! ") }
-            searchBar.barTintColor = UIColor(hexString: colorHex)
-            navBar.barTintColor = UIColor(hexString: colorHex)
-        }
+        updateNavBarSetup(withHexCode: colorHex)
         
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+
+        updateNavBarSetup(withHexCode: "1D9BF6")
+        
+    }
+    
+    func updateNavBarSetup(withHexCode colorHexCode: String) {
+        
+        guard let navBar = navigationController?.navigationBar else { fatalError("Error Navigation Bar does not exist. ") }
+        
+        guard let uiColorHex = UIColor(hexString: colorHexCode) else { fatalError("Error UIColor does not exist.") }
+        
+        // the color of SearchBar background
+        searchBar.barTintColor = UIColor(hexString: colorHexCode)
+        // the color of NavBar background
+        navBar.barTintColor = UIColor(hexString: colorHexCode)
+        // Color of Tint (including text and button on top nav bar)
+        navBar.tintColor = ContrastColorOf(uiColorHex, returnFlat: true)
+        // Color of Text (large)
+        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf( uiColorHex, returnFlat: true)]
+        
+        
+    }
     
     
 
@@ -332,8 +350,6 @@ extension TodoListViewController : UISearchBarDelegate {
         
     }
 
-    
-    
     // Continue 264 - at 12 mins // 22 Apr 2019
     
 }
